@@ -1,6 +1,8 @@
 var _ = require('lodash');
 var $ = require('jquery');
 
+window.$ = $;
+
 var objects = [];
 var requests = [
 	[]

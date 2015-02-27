@@ -7,16 +7,20 @@ window.objects = config.objectCache;
 require('jquery-ui');
 require('./main.css');
 
+var touch = !function hasTouchEvents() {
+	return ('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch;
+}();
+
 var moving = false;
 
-$('body').mousedown(function(e) {
+$('body').on(touch ? 'touchstart' : 'mousedown', (function(e) {
 
 	if ($(e.target).closest('.screen,.hud').length) return;
 
 	var anchorX = e.pageX;
 	var anchorY = e.pageY;
 
-	$('body').mousemove(function(e) {
+	$('body').on(touch ? 'touchmove' : 'mousemove', (function(e) {
 			var p = $('.card-container').position();
 
 			config.globalXOffset = p.left - (anchorX - e.pageX);
@@ -39,7 +43,7 @@ var rerenderMosaic = _.throttle(function() {
 	if (config.globalXOffset <= 0 || config.globalYOffset >= 0) topRight.renderView();
 }, 500);
 
-$('body').mouseup(function(e) {
+$('body').on(touch ? 'touchend' : 'mouseup', (function(e) {
 	rerenderMosaic();
 	$('body').off('mousemove');
 });
