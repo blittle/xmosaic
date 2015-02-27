@@ -22,7 +22,7 @@ function getRequest(deferred) {
 			}, 50);
 		} else {
 			requestInProgress = true;
-			$.get('http://104.236.165.92:3000/apod/images?page=' + requests.length).then(function(resp) {
+			$.get('/apod/images?page=' + requests.length).then(function(resp) {
 				if(requests.length > 30) {
 					requests = [];
 				}
