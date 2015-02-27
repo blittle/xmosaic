@@ -44,6 +44,11 @@ $('body').mouseup(function(e) {
 	$('body').off('mousemove');
 });
 
+$(window).mouseup(function(e) {
+	rerenderMosaic();
+	$('body').off('mousemove');
+});
+
 var bottomRight = new Quadrant(1, 1);
 var topRight = new Quadrant(1, -1);
 var topLeft = new Quadrant(-1, -1);
