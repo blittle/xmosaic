@@ -75,7 +75,7 @@ $('body').on('click', '.card', function(e) {
 		var imageTitle = o.json.title;
 		$('body')
 			.append('<div class="screen"></div>')
-			.append('<div class="hud" style="background: transparent url(\'http://104.236.165.92:8080/' + o.json.localImages.fullPath +
+			.append('<div class="hud" style="background: transparent url(\'/' + o.json.localImages.fullPath +
 				'\') no-repeat center; background-size: 100%; ">' +
 				'<i class="fa fa-times-circle-o fa-3x"></i>' +
 				"<div class='caption'><h1>" + o.json.title + "</h1>" +

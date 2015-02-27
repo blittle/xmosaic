@@ -93,7 +93,7 @@ Quadrant.prototype.renderObject = function(id, x, y, width, height, mos, windowW
 	var path = "";
 
 	if(objDef.json && objDef.json.localImages) {
-		path = 'http://104.236.165.92:8080/' + objDef.json.localImages.medPath;
+		path = '/' + objDef.json.localImages.medPath;
 	} else if(objDef.json && objDef.json.youtube) {
 		path = "http://img.youtube.com/vi/" + objDef.json.youtube + "/default.jpg";
 	} else if(objDef.json && objDef.json.vimeo) {
@@ -146,7 +146,7 @@ function getObjectResource(o) {
 	config.getObject().then(function(json) {
 		o.json = json;
 		if (o.json.localImages) {
-			$('#' + o.id).find('img').attr('src', 'http://104.236.165.92:8080/' + o.json.localImages.medPath);
+			$('#' + o.id).find('img').attr('src', '/' + o.json.localImages.medPath);
 		} else if (o.json.youtube) {
 			$('#' + o.id).find('img').attr('src', "http://img.youtube.com/vi/" + o.json.youtube + "/default.jpg");
 			console.log('youtube');
