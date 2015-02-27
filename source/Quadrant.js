@@ -4,6 +4,9 @@ var config = require('./config');
 
 require('./Quadrant.css');
 
+var page = 1;
+var availableObjects = [];
+
 function cardInView(left, top, cardWidth, cardHeight, windowWidth, windowHeight) {
 	return ((left + cardWidth) < ((-1 * config.globalXOffset) + windowWidth + (2 * (Quadrant.SIZE + Quadrant.BORDER)))) &&
 		((top + cardHeight) < ((-1 * config.globalYOffset) + windowHeight + (2 * (Quadrant.SIZE + Quadrant.BORDER)))) &&
@@ -55,21 +58,12 @@ Quadrant.prototype.renderView = function() {
 				scope.objects[x + 1][y] = "PLACEHOLDER";
 				scope.objects[x + 1][y + 1] = "PLACEHOLDER";
 			} else if (def.h > 1) {
-				// if(scope.y > 0) {
 				scope.objects[x][y + 1] = "PLACEHOLDER";
-				// } else {
-				// 	scope.objects[x+1][y] = "PLACEHOLDER";	
-				// }
 			} else if (def.w > 1) {
-				// if(scope.x > 0) {
 				scope.objects[x + 1][y] = "PLACEHOLDER";
-				// } else {
-				// 	scope.objects[x][y+1] = "PLACEHOLDER";						
-				// }
 			}
 
-
-			if (scope.renderObject(def.id, x, y, def.w * Quadrant.SIZE, def.h * Quadrant.SIZE, scope.mos, windowWidth, windowHeight)) {
+			if (scope.renderObject(def.id, x, y, def.w * Quadrant.SIZE, def.h * Quadrant.SIZE, scope.mos, windowWidth, windowHeight, def)) {
 				count++;
 			} else {
 				$('#' + def.id).remove();
@@ -77,7 +71,6 @@ Quadrant.prototype.renderView = function() {
 
 		});
 	});
-	console.log('images appended', count, this.renderQueue.length, $('.card').length, scope.rendering);
 
 	var i = this.renderQueue.length;
 
@@ -91,19 +84,27 @@ Quadrant.prototype.renderView = function() {
 
 }
 
-Quadrant.prototype.renderObject = function(id, x, y, width, height, mos, windowWidth, windowHeight) {
+Quadrant.prototype.renderObject = function(id, x, y, width, height, mos, windowWidth, windowHeight, objDef) {
 	var left = x * Quadrant.SIZE * this.x;
 	var top = y * Quadrant.SIZE * this.y;
-
 	if (this.x < 0) left -= width;
 	if (this.y < 0) top -= height;
 
+	var path = "";
+
+	if(objDef.json && objDef.json.localImages) {
+		path = 'http://104.236.165.92:8080/' + objDef.json.localImages.medPath;
+	} else if(objDef.json && objDef.json.youtube) {
+		path = "http://img.youtube.com/vi/" + objDef.json.youtube + "/default.jpg";
+	} else if(objDef.json && objDef.json.vimeo) {
+	}
+
 	if (cardInView(left, top, width, height, windowWidth, windowHeight)) {
 		if (!$('#' + id).length) {
-			$('.card-container').append('<div id="' + id + '" class="card" style="width: ' + width + 'px; height: ' + height + 'px; left:' + left + 'px; top:' + top + 'px;" data-x="' + x + '" data-y="' + y + '" data-mosaic="' + mos + '" data-width="' + width + '" data-height="' + height + '"> ' +
-				'<img src="http://placekitten.com/' + (width - Quadrant.BORDER) + '/' + (height - Quadrant.BORDER) + '">' +
+			$('.card-container').append(
+				'<div id="' + id + '" class="card" style="width: ' + width + 'px; height: ' + height + 'px; left:' + left + 'px; top:' + top + 'px;" data-x="' + x + '" data-y="' + y + '" data-mosaic="' + mos + '" data-width="' + width + '" data-height="' + height + '"> ' +
+				'<img src="' + path + '" class="' + ((width === 300 && height === 600) ? 'tall' : 'wide') + '">' +
 				'</div>');
-
 			this.renderQueue.push(id);
 		}
 
@@ -122,23 +123,17 @@ Quadrant.prototype.getRandomObject = function(x, y) {
 				break;
 			}
 		} else if (o.h > 1) {
-			// if(this.y > 0) {
 			if (!this.objects[x][y + 1]) break;
-			// } else {
-			// 	if(!this.objects[x + 1][y]) break;
-			// }
 		} else if (o.w > 1) {
-			// if(this.x > 0) {
 			if (!this.objects[x + 1][y]) break;
-			// } else {
-			// 	if(!this.objects[x][y + 1]) break;
-			// }
 		} else {
 			break;
 		}
 	}
 
 	o.id = _.uniqueId();
+	getObjectResource(o);
+	config.objectCache.push(o);
 
 	return o;
 }
@@ -146,11 +141,28 @@ Quadrant.prototype.getRandomObject = function(x, y) {
 Quadrant.SIZE = 300;
 Quadrant.BORDER = 16;
 
+function getObjectResource(o) {
+
+	config.getObject().then(function(json) {
+		o.json = json;
+		if (o.json.localImages) {
+			$('#' + o.id).find('img').attr('src', 'http://104.236.165.92:8080/' + o.json.localImages.medPath);
+		} else if (o.json.youtube) {
+			$('#' + o.id).find('img').attr('src', "http://img.youtube.com/vi/" + o.json.youtube + "/default.jpg");
+			console.log('youtube');
+		} else if (o.json.vimeo) {
+			console.log('vimeo');
+		}
+	});
+}
+
 Quadrant.prototype.getRandomObjectType = function() {
-	return {
+	var o = {
 		h: Math.ceil(Math.random() * 2),
 		w: Math.ceil(Math.random() * 2)
-	}
+	};
+
+	return o;
 }
 
 module.exports = Quadrant;
