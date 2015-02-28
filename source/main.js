@@ -7,32 +7,40 @@ window.objects = config.objectCache;
 require('jquery-ui');
 require('./main.css');
 
-var touch = !function hasTouchEvents() {
+function hasTouchEvents() {
 	return ('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch;
-}();
+};
 
 var moving = false;
 
-$('body').on(touch ? 'touchstart' : 'mousedown', (function(e) {
+$('body').on((hasTouchEvents() ? 'touchstart' : 'mousedown'), function(e) {
+  console.log('touch down');
 
 	if ($(e.target).closest('.screen,.hud').length) return;
 
-	var anchorX = e.pageX;
-	var anchorY = e.pageY;
+  var hasTouch = hasTouchEvents();
 
-	$('body').on(touch ? 'touchmove' : 'mousemove', (function(e) {
+	var anchorX = hasTouch ? e.originalEvent.touches[0].pageX : e.pageX;
+	var anchorY = hasTouch ? e.originalEvent.touches[0].pageY : e.pageY;
+
+	$('body').on(( hasTouch ? 'touchmove' : 'mousemove'), function(e) {
+      var x = hasTouch ? e.originalEvent.touches[0].pageX : e.pageX;
+      var y = hasTouch ? e.originalEvent.touches[0].pageY : e.pageY;
+
 			var p = $('.card-container').position();
 
-			config.globalXOffset = p.left - (anchorX - e.pageX);
-			config.globalYOffset = p.top - (anchorY - e.pageY);
+			config.globalXOffset = p.left - (anchorX - x);
+			config.globalYOffset = p.top - (anchorY - y);
+
+      console.log(anchorX, anchorY, x, y, config.globalXOffset, config.globalYOffset)
 
 			$('.card-container').css({
 				left: config.globalXOffset,
 				top: config.globalYOffset
 			});
 
-			anchorX = e.pageX;
-			anchorY = e.pageY;
+			anchorX = x;
+			anchorY = y;
 	});
 });
 
@@ -43,7 +51,7 @@ var rerenderMosaic = _.throttle(function() {
 	if (config.globalXOffset <= 0 || config.globalYOffset >= 0) topRight.renderView();
 }, 500);
 
-$('body').on(touch ? 'touchend' : 'mouseup', (function(e) {
+$('body').on((hasTouchEvents() ? 'touchend' : 'mouseup'), function(e) {
 	rerenderMosaic();
 	$('body').off('mousemove');
 });
@@ -107,6 +115,8 @@ $('body').on('click', '.fa-times-circle-o,.screen', function() {
 	hudDisplayed = false;
 });
 
-$('body').on('click', '.hud', function() {
-	$('.hud').toggleClass('hide');
+$('body').on('click', '.hud', function(e) {
+  if($(e.target).hasClass('hud')) {
+    $('.hud').toggleClass('hide');
+  }
 });
