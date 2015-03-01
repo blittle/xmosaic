@@ -13,13 +13,8 @@ serviceComposer.compose([
     version: 1,
     type: serviceComposer.types.CACHE_OFFLINE,
     customEvaluator: function(response, cache, event, config) {
-      if(response.status < 400) {
-        return new Promise(function(resolve, reject) {
-          if(event.request.url.indexOf('page=') > -1) {
-            prefetchImages(response.clone());
-          }
-          cache.put(event.request, response.clone());
-        });
+      if(event.request.url.indexOf('page=') > -1) {
+        prefetchImages(response.clone());
       }
     }
   }
