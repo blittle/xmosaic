@@ -40,8 +40,8 @@ $('body').on((hasTouchEvents() ? 'touchstart' : 'mousedown'), function(e) {
 
 			var p = $('.card-container').position();
 
-			config.globalXOffset = p.left - (anchorX - x);
-			config.globalYOffset = p.top - (anchorY - y);
+			config.globalXOffset = hasTouch ? (p.left - (anchorX + x)) : (p.left - (anchorX - x));
+			config.globalYOffset = hasTouch ? (p.top - (anchorY + y)) : (p.top - (anchorY - y));
 
       console.log(anchorX, anchorY, x, y, config.globalXOffset, config.globalYOffset)
 
