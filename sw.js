@@ -12,7 +12,7 @@ serviceComposer.compose([
     name: 'others',
     version: 1,
     type: serviceComposer.types.CACHE_OFFLINE,
-    customEvaluator: function(response, cache, event, config) {
+    onSuccess: function(response, cache, event, config) {
       if(event.request.url.indexOf('page=') > -1) {
         prefetchImages(response.clone());
       }
@@ -22,13 +22,13 @@ serviceComposer.compose([
 
 function prefetchImages(response) {
   response.json().then(function(json) {
-    var urls = [];
-    json.forEach(function(obj) {
-      urls.push(obj.localImages.medPath);
-    });
-
     caches.open('images-1').then(function(cache) {
-      cache.addAll(urls);
+      var urls = json.forEach(function(obj) {
+        cache.match(obj.localImages.medPath)
+        .catch(function() {
+          cache.add(obj.localImages.medPath);
+        })
+      });
     });
   });
 }
